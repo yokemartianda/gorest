@@ -13,6 +13,7 @@ func RestRouter() *mux.Router {
 	r.HandleFunc("/", s.Put).Methods(http.MethodPut)
 	r.HandleFunc("/", s.Delete).Methods(http.MethodDelete)
 	r.HandleFunc("/", s.NotFound)
+	r.Use(LoggingMiddleware)
 	return r
 }
 
