@@ -8,7 +8,14 @@ import (
 
 func RestRouter() *mux.Router {
 	r := mux.NewRouter()
+	api := r.PathPrefix("/api/v1").Subrouter()
 
+	customerRouter(api)
+	r.Use(LoggingMiddleware)
+	return r
+}
+
+func customerRouter(r *mux.Router) {
 	var custService = service.NewCustomerService()
 	var custHandler = NewCustomerHandler(custService)
 	r.HandleFunc("/customers/{id}", custHandler.Get).Methods(http.MethodGet)
@@ -16,7 +23,5 @@ func RestRouter() *mux.Router {
 	r.HandleFunc("/customers/{id}", custHandler.Put).Methods(http.MethodPut)
 	r.HandleFunc("/customers/{id}", custHandler.Delete).Methods(http.MethodDelete)
 	r.HandleFunc("/", custHandler.NotFound)
-	r.Use(LoggingMiddleware)
-	return r
 }
 
