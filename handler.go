@@ -49,18 +49,77 @@ func (s *CustomerHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *CustomerHandler) Post(w http.ResponseWriter, r *http.Request) {
+
+	var cust = &model.Customer{}
+	err := json.NewDecoder(r.Body).Decode(cust)
+	if err != nil {
+		errMsg := fmt.Sprintf("Request decoder error : %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		s.responseBuilder(w, errMsg)
+		return
+	}
+
+	s.custService.CreateCustomer(cust)
 	w.WriteHeader(http.StatusCreated)
-	s.responseBuilder(w, "post called")
+	s.responseBuilder(w, "customer created")
 }
 
 func (s *CustomerHandler) Put(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	custID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		errMsg := fmt.Sprintf("Response builder error : %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		s.responseBuilder(w, errMsg)
+		return
+	}
+	var cust = &model.Customer{}
+	err = json.NewDecoder(r.Body).Decode(cust)
+	if err != nil {
+		errMsg := fmt.Sprintf("Request decoder error : %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		s.responseBuilder(w, errMsg)
+		return
+	}
+
+	err = s.custService.UpdateCustomer(custID, cust)
+	if err != nil {
+		errMsg := fmt.Sprintf("Update customer error : %v", err)
+
+		w.WriteHeader(http.StatusNotFound)
+		s.responseBuilder(w, errMsg)
+		return
+	}
+
 	w.WriteHeader(http.StatusAccepted)
-	s.responseBuilder(w, "put called")
+	s.responseBuilder(w, "customer updated")
 }
 
 func (s *CustomerHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	custID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		errMsg := fmt.Sprintf("Response builder error : %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		s.responseBuilder(w, errMsg)
+		return
+	}
+
+	err = s.custService.DeleteCustomer(custID)
+	if err != nil {
+		errMsg := fmt.Sprintf("Delete customer error : %v", err)
+
+		w.WriteHeader(http.StatusNotFound)
+		s.responseBuilder(w, errMsg)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	s.responseBuilder(w, "delete called")
+	s.responseBuilder(w, "customer deleted")
 }
 
 func (s *CustomerHandler) NotFound(w http.ResponseWriter, r *http.Request) {
