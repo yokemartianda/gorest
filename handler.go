@@ -1,35 +1,47 @@
 package main
 
-import "net/http"
+import (
+	"encoding/json"
+	"github.com/pushm0v/gorest/model"
+	"log"
+	"net/http"
+)
 
 type Handler struct{}
 
-func (s *Handler) Get(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) responseBuilder(w http.ResponseWriter, message string) {
 	w.Header().Set("Content-Type", "application/json")
+	m := model.Response{
+		Message: message,
+	}
+
+	err := json.NewEncoder(w).Encode(m)
+	if err != nil {
+		log.Fatalf("Response builder error : %v", err)
+	}
+}
+
+func (s *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "get called"}`))
+	s.responseBuilder(w, "get called")
 }
 
 func (s *Handler) Post(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"message": "post called"}`))
+	s.responseBuilder(w, "post called")
 }
 
 func (s *Handler) Put(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte(`{"message": "put called"}`))
+	s.responseBuilder(w, "put called")
 }
 
 func (s *Handler) Delete(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "delete called"}`))
+	s.responseBuilder(w, "delete called")
 }
 
 func (s *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte(`{"message": "not found"}`))
+	s.responseBuilder(w, "not found")
 }
