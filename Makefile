@@ -1,4 +1,4 @@
-.PHONY: default help build run
+.PHONY: default help build run loadtest
 
 SHELL         = /bin/bash
 APP_NAME      = gorest
@@ -10,6 +10,8 @@ help:
 	@echo
 	@echo 'Usage:'
 	@echo '    make build                 Compile the project.'
+	@echo '    make run                   Build then run the project.'
+	@echo '    make loadtest              Run load test using K6.'
 	@echo
 
 build:
@@ -19,3 +21,7 @@ build:
 run: build
 	@echo "Running ${APP_NAME}"
 	bin/${APP_NAME} ${ARGS}
+
+loadtest:
+	@echo "Running load test using K6"
+	k6 run test/k6.js
