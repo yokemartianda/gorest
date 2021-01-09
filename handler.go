@@ -42,7 +42,14 @@ func (s *CustomerHandler) Get(w http.ResponseWriter, r *http.Request) {
 		s.responseBuilder(w, errMsg)
 		return
 	}
-	customer := s.custService.GetCustomer(custID)
+	customer, err := s.custService.GetCustomer(custID)
+	if err != nil {
+		errMsg := fmt.Sprintf("Get Customer error : %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		s.responseBuilder(w, errMsg)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	s.responseBuilder(w, customer)
@@ -60,7 +67,14 @@ func (s *CustomerHandler) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.custService.CreateCustomer(cust)
+	err = s.custService.CreateCustomer(cust)
+	if err != nil {
+		errMsg := fmt.Sprintf("Create customer error : %v", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		s.responseBuilder(w, errMsg)
+		return
+	}
 	w.WriteHeader(http.StatusCreated)
 	s.responseBuilder(w, "customer created")
 }

@@ -2,7 +2,10 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/pushm0v/gorest/model"
+	"github.com/pushm0v/gorest/repository"
 	"github.com/pushm0v/gorest/service"
+	"log"
 	"net/http"
 )
 
@@ -16,8 +19,15 @@ func RestRouter() *mux.Router {
 }
 
 func customerRouter(r *mux.Router) {
-	var custService = service.NewCustomerService()
+	var dbConn, err = NewDBConnection("customer.db")
+	if err != nil {
+		log.Fatalf("DB Connection error : %v", err)
+	}
+	dbConn.AutoMigrate(&model.Customer{})
+	var custRepository = repository.NewCustomerRepository(dbConn)
+	var custService = service.NewCustomerService(custRepository)
 	var custHandler = NewCustomerHandler(custService)
+
 	r.HandleFunc("/customers/{id}", custHandler.Get).Methods(http.MethodGet)
 	r.HandleFunc("/customers", custHandler.Post).Methods(http.MethodPost)
 	r.HandleFunc("/customers/{id}", custHandler.Put).Methods(http.MethodPut)

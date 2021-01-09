@@ -1,68 +1,62 @@
 package service
 
 import (
-	"fmt"
 	"github.com/pushm0v/gorest/model"
+	"github.com/pushm0v/gorest/repository"
 )
 
 type CustomerService interface {
-	GetCustomer(id int) (m *model.Customer)
-	CreateCustomer(cust *model.Customer)
+	GetCustomer(id int) (m *model.Customer, err error)
+	CreateCustomer(cust *model.Customer) error
 	UpdateCustomer(id int, cust *model.Customer) error
 	DeleteCustomer(id int) error
 }
 
 type customerService struct {
-	customers map [int]*model.Customer
+	customers map[int]*model.Customer
+	custRepository repository.CustomerRepository
 }
 
-func NewCustomerService() CustomerService {
-	return &customerService{customers: map [int]*model.Customer{}}
-}
-
-func (c *customerService) generateCustID() int {
-	lenOfCustomer := len(c.customers)
-	return lenOfCustomer + 1
-}
-
-func (c *customerService) checkCustomerID(id int) error {
-	if c.customers[id] == nil {
-		return fmt.Errorf("Customer not found with ID %v", id)
+func NewCustomerService(custRepository repository.CustomerRepository) CustomerService {
+	return &customerService{
+		custRepository: custRepository,
 	}
-
-	return nil
 }
 
-func (c *customerService) GetCustomer(id int) (m *model.Customer) {
-	return c.customers[id]
+func (c *customerService) getCustomerById(id int) (m *model.Customer, err error) {
+	m,err = c.custRepository.FindOne(id)
+	return
 }
 
-func (c *customerService) CreateCustomer(cust *model.Customer) {
-	id := c.generateCustID()
-	cust.ID = id
+func (c *customerService) GetCustomer(id int) (m *model.Customer, err error) {
+	return c.getCustomerById(id)
+}
 
-	c.customers[id] = cust
+func (c *customerService) CreateCustomer(cust *model.Customer) error {
+	return c.custRepository.Create(cust)
 }
 
 func (c *customerService) UpdateCustomer(id int, cust *model.Customer) error {
-	err := c.checkCustomerID(id)
+	existingCustomer, err := c.getCustomerById(id)
 	if err != nil {
 		return err
 	}
 
-	cust.ID = id
-	c.customers[id] = cust
-	return nil
+	var updateValue = model.Customer{
+		Name:    cust.Name,
+		Address: cust.Address,
+	}
+
+	return c.custRepository.Update(existingCustomer, updateValue)
 }
 
 func (c *customerService) DeleteCustomer(id int) error {
-	err := c.checkCustomerID(id)
+	existingCustomer, err := c.getCustomerById(id)
 	if err != nil {
 		return err
 	}
 
-	delete(c.customers,id)
-	return nil
+	return c.custRepository.Delete(existingCustomer)
 }
 
 
