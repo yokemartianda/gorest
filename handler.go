@@ -3,15 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/pushm0v/gorest/model"
-	"github.com/pushm0v/gorest/service"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/yokemartianda/gorest/model"
+	"github.com/yokemartianda/gorest/service"
 )
 
-type CustomerHandler struct{
+type CustomerHandler struct {
 	custService service.CustomerService
 }
 
@@ -134,6 +135,24 @@ func (s *CustomerHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	s.responseBuilder(w, "customer deleted")
+}
+
+func (s *CustomerHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+
+	limit, err := strconv.Atoi(r.FormValue("limit"))
+	offset, err := strconv.Atoi(r.FormValue("offset"))
+	// fmt.Println(limit, offset)
+	customers, err := s.custService.GetAll(limit, offset)
+	if err != nil {
+		errMsg := fmt.Sprintf("Get Customer error : %v", err)
+
+		w.WriteHeader(http.StatusBadRequest)
+		s.responseBuilder(w, errMsg)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	s.responseBuilder(w, customers)
 }
 
 func (s *CustomerHandler) NotFound(w http.ResponseWriter, r *http.Request) {

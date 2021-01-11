@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/pushm0v/gorest/model"
+	"github.com/yokemartianda/gorest/model"
 	"gorm.io/gorm"
 )
 
@@ -9,7 +9,8 @@ type CustomerRepository interface {
 	Create(cust *model.Customer) error
 	Update(cust *model.Customer, updateValue interface{}) error
 	Delete(cust *model.Customer) error
-	FindOne(id int) (*model.Customer,error)
+	FindOne(id int) (*model.Customer, error)
+	FindAll(limit int, offset int) ([]model.Customer, error)
 }
 
 type customerRepository struct {
@@ -24,7 +25,7 @@ func (c *customerRepository) Create(cust *model.Customer) error {
 	return c.dbConnection.Create(cust).Error
 }
 
-func (c *customerRepository) FindOne(id int) (cust *model.Customer,err error) {
+func (c *customerRepository) FindOne(id int) (cust *model.Customer, err error) {
 	cust = &model.Customer{}
 	err = c.dbConnection.First(cust, id).Error
 
@@ -37,4 +38,10 @@ func (c *customerRepository) Update(cust *model.Customer, updateValue interface{
 
 func (c *customerRepository) Delete(cust *model.Customer) error {
 	return c.dbConnection.Delete(cust).Error
+}
+
+func (c *customerRepository) FindAll(limit int, offset int) (cust []model.Customer, err error) {
+	cust = []model.Customer{}
+	err = c.dbConnection.Debug().Limit(limit).Offset(offset).Find(&cust).Error
+	return
 }
