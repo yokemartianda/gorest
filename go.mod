@@ -1,4 +1,4 @@
-module github.com/pushm0v/gorest
+module github.com/yokemartianda/gorest
 
 go 1.14
 
